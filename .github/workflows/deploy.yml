@@ -1,0 +1,42 @@
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Backend bauen
+      - name: Install & Build Backend
+        run: |
+          cd server
+          npm install
+          npm run build
+
+      # Hier rufst du das fertige Script auf
+      - name: Run fetcher to update data
+        run: |
+          node dist/server/index.js
+
+      # Kopiere die frisch aktualisierte JSON in dein frontend/public
+      - name: Copy market_data.json to Frontend
+        run: |
+          cp data/market_data.json frontend/public/data/market_data.json
+
+      # Frontend bauen
+      - name: Install & Build Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      # Deploy to GH-Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/build
