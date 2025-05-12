@@ -1,0 +1,1 @@
+GET http://localhost:5173/api/yfinance/history?symbol=AAPL&days=3650

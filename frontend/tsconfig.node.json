@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+      "composite": true,
+      "skipLibCheck": true,
+      "module": "ESNext",
+      "moduleResolution": "node",
+      "allowSyntheticDefaultImports": true,
+      "strict": true,
+      "target": "ESNext",
+      "lib": ["ESNext"],
+      "types": ["node"],
+      "outDir": "dist",
+      "esModuleInterop": true,
+      "resolveJsonModule": true
+    },
+    "ts-node": {
+      "esm": true,
+      "experimentalSpecifiers": true
+    },
+    "include": ["server/**/*.ts", "src/services/MarketDataService.ts", "src/utils/**/*.ts", "src/types/**/*.ts"]
+  }
+  
