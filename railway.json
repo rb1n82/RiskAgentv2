@@ -1,0 +1,11 @@
+{
+  "services": [
+    {
+      "name": "riskagent-server",
+      "path": "server",
+      "plugin": "nodejs",
+      "buildCommand": "npm ci && npm run build",
+      "startCommand": "npm run start"
+    }
+  ]
+}
