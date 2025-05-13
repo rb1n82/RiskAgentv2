@@ -8,6 +8,8 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    base: '/RiskAgent/',       // z.B. '/riskagent/'
+    plugins: [react()],
     proxy: {
       '/yahoo-finance': {
         target: 'https://query2.finance.yahoo.com',

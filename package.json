@@ -5,15 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "npm run build:server && npm run build:frontend",
     "build:dev": "vite build --mode development",
-    "build:server": "tsc -p server/tsconfig.json",
-    "start:server": "npm run build:server && node --experimental-specifier-resolution=node dist/server/index.js",
+    "build:server": "cd server && npm install && npm run build",
+    "start:server": "cd server && npm run start",
+    "build:frontend":"cd frontend && npm install && npm run build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "fetch-data": "cross-env NODE_OPTIONS=\"--loader ts-node/esm\" node --experimental-specifier-resolution=node scripts/fetchData.ts",
-    "heroku-postbuild": "cd server && npm install && npm run build && cd ../frontend && npm install && npm run build",
-    "start": "node dist/server/index.js"
+    "fetch-data": "cross-env NODE_OPTIONS=\"--loader ts-node/esm\" node --experimental-specifier-resolution=node scripts/fetchData.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -47,9 +46,11 @@
     "@radix-ui/react-toggle": "^1.1.0",
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.4",
+    "@react-oauth/google": "^0.12.2",
     "@tanstack/react-query": "^5.56.2",
     "@types/node-fetch": "^2.6.12",
     "axios": "^1.9.0",
+    "bcryptjs": "^3.0.2",
     "bottleneck": "^2.19.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -59,8 +60,11 @@
     "dotenv": "^16.5.0",
     "embla-carousel-react": "^8.3.0",
     "express": "^5.1.0",
+    "google-auth-library": "^9.15.1",
     "input-otp": "^1.2.4",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.462.0",
+    "mongoose": "^8.14.2",
     "next-themes": "^0.3.0",
     "node-fetch": "^3.3.2",
     "react": "^18.3.1",
@@ -100,5 +104,4 @@
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.19"
   }
-  
 }

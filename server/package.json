@@ -4,15 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -p tsconfig.json",
-    "build:dev": "vite build --mode development",
-    "build:server": "tsc -p server/tsconfig.json",
-    "start:server": "npm run build:server && node --experimental-specifier-resolution=node dist/server/index.js",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "fetch-data": "cross-env NODE_OPTIONS=\"--loader ts-node/esm\" node --experimental-specifier-resolution=node scripts/fetchData.ts",
-    "start": "node dist/server/index.js"  
+    "build": "tsc -p tsconfig.json",                       
+    "start": "node --experimental-specifier-resolution=node dist/index.js",
+    "dev": "nodemon --experimental-specifier-resolution=node src/index.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
