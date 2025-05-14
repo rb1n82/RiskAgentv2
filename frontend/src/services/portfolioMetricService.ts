@@ -77,7 +77,7 @@ export async function computePortfolioMetrics(
 
   // 5) Metriken berechnen
   const dummy: Asset = { id: "__port__", name: "Portfolio", symbol: "PORT", price: totalValue, priceChange24h: 0, quantity:1, volatility:0, historicalData: [] };
-  const metrics = AssetMetricService.calculateAssetMetrics(dummy, simulatedPrices, undefined, 1);
+  const metrics = AssetMetricService.calculateAssetMetrics(dummy, simulatedPrices, undefined, 1, timeframe);
 
   // 6) Beta nur bei vorhandenem Benchmark
   let betaValue = 0;
