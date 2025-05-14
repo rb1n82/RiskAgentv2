@@ -22,7 +22,9 @@ interface SPYDataPoint {
 
 // Loader-Funktion für SPY-Zeitreihe
 async function loadSPYTimeSeries(): Promise<SPYDataPoint[]> {
-  const res = await fetch(`/data/timeseries/SPY.json`, { cache: "no-cache" });
+  const API = import.meta.env.VITE_API_URL;
+  if (!API) throw new Error('VITE_API_URL ist nicht gesetzt');
+  const res = await fetch(`${API}/data/timeseries/SPY.json`, { cache: "no-cache" });
   if (!res.ok) {
     throw new Error(`Fehler beim Laden der SPY-Daten: ${res.status} ${res.statusText}`);
   }
