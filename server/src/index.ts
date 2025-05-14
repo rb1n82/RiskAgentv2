@@ -504,7 +504,9 @@ app.use((_req, res) => {
   res.sendFile(path.join(frontDir, 'index.html'));
 });
 
-
+app.get("/", (_req, res) => {
+  res.status(200).send("OK");
+});
    
    
    app.listen(PORT,()=>{ console.log(`🚀 API @ http://localhost:${PORT}`); console.log('CG_KEY', process.env.CG_PRO_KEY?.slice(0,6)); updateAll(); setInterval(updateAll,UPDATE_EVERY); });
