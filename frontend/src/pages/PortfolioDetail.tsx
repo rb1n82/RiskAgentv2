@@ -158,15 +158,37 @@ export default function PortfolioDetail({
   }, [portfolioId, selectPortfolio]);
 
   // Timeseries importieren (Vite)
-  const timeseriesModules = import.meta.glob<true, string, { default: Bar[] }>(
-    "/data/timeseries/*.json",
-    { eager: true }
-  );
-  const barsMap: Record<string, Bar[]> = {};
-  for (const path in timeseriesModules) {
-    const m = path.match(/\/data\/timeseries\/(.+)\.json$/);
-    if (m) barsMap[m[1]] = timeseriesModules[path].default;
+  const [barsMap, setBarsMap] = useState<Record<string, Bar[]>>({});
+
+useEffect(() => {
+  if (!selectedPortfolio) return;             // oder assets, je nach Kontext
+  const API = import.meta.env.VITE_API_URL;
+  if (!API) {
+    console.error("VITE_API_URL ist nicht gesetzt");
+    return;
   }
+
+  const loadSeries = async () => {
+    const map: Record<string, Bar[]> = {};
+    await Promise.all(
+      selectedPortfolio.assets.map(async ({ assetId }) => {
+        try {
+          const res = await fetch(
+            `${API}/data/timeseries/${assetId}.json`,
+            { cache: "no-cache" }
+          );
+          if (!res.ok) throw new Error(res.statusText);
+          map[assetId] = await res.json();
+        } catch {
+          map[assetId] = [];
+        }
+      })
+    );
+    setBarsMap(map);
+  };
+
+  loadSeries();
+}, [selectedPortfolio]);
 
   // 2.5) Duplikate entfernen & letzte 3 Monate filtern
   const processedBarsMap = useMemo(() => {
