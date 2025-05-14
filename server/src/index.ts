@@ -504,6 +504,9 @@ app.use((_req, res) => {
   res.sendFile(path.join(frontDir, 'index.html'));
 });
 
+const dataPath = path.join(process.cwd(), 'server', 'data');
+app.use('/data', express.static(dataPath));
+
 app.get("/", (_req, res) => {
   res.status(200).send("OK");
 });
