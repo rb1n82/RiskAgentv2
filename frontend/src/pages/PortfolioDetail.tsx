@@ -161,11 +161,9 @@ export default function PortfolioDetail({
 const [barsMap, setBarsMap] = useState<Record<string, Bar[]>>({});
 
 useEffect(() => {
-  const assets = selectedPortfolio?.assets;
-  if (!assets || assets.length === 0) {
-    setBarsMap({});
-    return;
-  }
+  /** 1) Symbol‑Liste zusammenstellen  */
+  const portfolioIds = selectedPortfolio?.assets.map(a => a.assetId) ?? [];
+  const symbols      = [...new Set([...portfolioIds, "SPY"])];   // «SPY» anhängen + Duplikate filtern
 
   const API = import.meta.env.VITE_API_URL;
   if (!API) {
@@ -173,25 +171,26 @@ useEffect(() => {
     return;
   }
 
-  const loadSeries = async () => {
+  /** 2) Kurs‑Dateien laden  */
+  (async () => {
     const map: Record<string, Bar[]> = {};
+
     await Promise.all(
-      assets.map(async ({ assetId }) => {
+      symbols.map(async (id) => {
         try {
-          const res = await fetch(`${API}/data/timeseries/${assetId}.json`, { cache: "no-cache" });
-          if (!res.ok) throw new Error(res.statusText);
-          map[assetId] = await res.json();
-        } catch (e) {
-          console.warn(`Fehler beim Laden der Series für ${assetId}:`, e);
-          map[assetId] = [];
+          const res = await fetch(`${API}/data/timeseries/${id}.json`, { cache: "no-cache" });
+          if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+          map[id] = await res.json();
+        } catch (err) {
+          console.warn(`⚠️  Timeseries für ${id} konnte nicht geladen werden:`, err);
+          map[id] = [];                                         // leerer Platzhalter
         }
       })
     );
-    setBarsMap(map);
-  };
 
-  loadSeries();
-}, [selectedPortfolio?.assets]); 
+    setBarsMap(map);
+  })();
+}, [selectedPortfolio?.assets]);
 
   // 2.5) Duplikate entfernen & letzte 3 Monate filtern
   const processedBarsMap = useMemo(() => {
