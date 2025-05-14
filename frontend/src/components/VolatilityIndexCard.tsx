@@ -8,7 +8,9 @@ interface VolatilityIndexCardProps {
 }
 
 async function calculateVIX(windowSize =30) {
-  const response = await fetch(`/data/timeseries/SPY.json`);
+  const API = import.meta.env.VITE_API_URL;
+  if (!API) throw new Error('VITE_API_URL ist nicht gesetzt');
+  const response = await fetch(`${API}/data/timeseries/SPY.json`, { cache: "no-cache" });
   const data = await response.json();
 
   // Adjusted Close-Preise extrahieren
