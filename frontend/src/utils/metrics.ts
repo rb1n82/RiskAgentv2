@@ -173,6 +173,10 @@ export function calculateSingleAssetVaRAbsolute(
   quantity: number,
   rfAnnual = 0.02
 ): number {
+  if (!bars || bars.length < 2) {
+    // Kein oder zu wenig Data Points → VaR = 0 oder NaN, je nachdem
+    return 0;
+  }
   const varPct = computeAssetMetrics(bars, rfAnnual).var95 / 100;
   const lastPrice = bars.at(-1)!.adj;
   return varPct * lastPrice * quantity;
