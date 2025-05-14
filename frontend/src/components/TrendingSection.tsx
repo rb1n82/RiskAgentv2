@@ -20,7 +20,7 @@ export default function TrendingSection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/market-data`)
+    fetch(`data/market-data`)
       .then(res => {
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
