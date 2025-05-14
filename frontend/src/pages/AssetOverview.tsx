@@ -53,7 +53,7 @@ export default function AssetOverview({ type, onNavigate }: AssetOverviewProps) 
 
       // immer das gesamte market_data.json abrufen
       const { data: obj } = await axios.get<Record<string, Snapshot>>(
-        'http://localhost:3001/api/market-data'
+        'data/market-data'
       );
       const all = Object.values(obj);
       setAssets(all);
