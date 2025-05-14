@@ -58,9 +58,14 @@ export default function AssetDetail({ assetId, onNavigate }: AssetDetailProps) {
 
   // 1) Asset laden
   useEffect(() => {
-    if (assetId) selectAsset(assetId);
+    if (!assetId) return;
+    // erst auswählen, wenn die Context-Assets geladen sind
+    if (assets.length > 0) {
+      selectAsset(assetId);
+    }
+    // cleanup: beim Unmount Selection zurücksetzen
     return () => selectAsset(null);
-  }, [assetId, selectAsset]);
+  }, [assetId, assets, selectAsset]);
 
   // 2) Zeitreihe laden
   useEffect(() => {
