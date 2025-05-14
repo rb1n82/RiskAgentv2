@@ -12,7 +12,12 @@ type MarketDataType = Record<string, {
 
 // Asynchronously load the market_data.json at runtime
 async function loadMarketData(): Promise<MarketDataType> {
-  const res = await fetch("/data/market_data.json", { cache: "no-cache" });
+  const API = import.meta.env.VITE_API_URL;
+  if (!API) throw new Error('VITE_API_URL ist nicht gesetzt');
+
+  // Hier rufst du die Express-Route /api/market-data auf
+  const url = `${API}/data/market_data.json`;
+  const res = await fetch(url, { cache: 'no-cache' });
   if (!res.ok) {
     throw new Error(`Failed to load market data: ${res.status} ${res.statusText}`);
   }
