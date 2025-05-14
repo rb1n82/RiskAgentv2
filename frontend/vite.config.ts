@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => ({
         }
       },
       '/data': {
-        target: 'http://localhost:3001',
+        target: 'https://riskagentv2.onrender.com',
         changeOrigin: true,
         secure: false,      // falls du kein HTTPS lokal hast
         rewrite: path => path, // behält /data/timeseries/… bei
