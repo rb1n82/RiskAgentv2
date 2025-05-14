@@ -496,9 +496,7 @@ app.use('/data', express.static(dataDir));
    }) as ExpressHandler);
 
 // Fallback für alle anderen Requests
-app.get('*', (_req, res) => {
-  res.sendFile(path.join(frontDir, 'index.html'));
-});
+
 
 app.get("/", (_req, res) => {
   res.status(200).send("OK");
