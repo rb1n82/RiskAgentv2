@@ -9,7 +9,11 @@ import { MarketDataEntry } from "@/lib/types";
 import { useState, useEffect } from "react";
 
 async function loadMarketData(): Promise<MarketDataEntry> {
-  const res = await fetch(`/data/market_data.json`, { cache: 'no-cache' });
+  const API = import.meta.env.VITE_API_URL;
+  if (!API) throw new Error('VITE_API_URL ist nicht gesetzt');
+
+  const url = `${API}/data/market_data.json`;
+  const res = await fetch(url, { cache: 'no-cache' });
   if (!res.ok) {
     throw new Error(`Fehler beim Laden: ${res.status} ${res.statusText}`);
   }
