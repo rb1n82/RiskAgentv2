@@ -31,86 +31,67 @@ function pickLastBarPerDay(bars: Bar[]): Bar[] {
 export async function computePortfolioMetrics(
   portfolio: { assets: { assetId: string; quantity: number }[] },
   barsMap: Record<string, Bar[]>,
-  timeframe: "daily" | "weekly" | "monthly" = "daily"
+  timeframe: "daily"|"weekly"|"monthly" = "daily"
 ): Promise<RiskMetrics> {
 
   const startOfYear = new Date(new Date().getFullYear(), 0, 1);
   const returnsMap: Record<string, number[]> = {};
   const weights: Record<string, number> = {};
   let totalValue = 0;
-  let ytdValue = 0;
+  let ytdValue   = 0;
 
+  // 1) Sammle Preise, YTD und mappe auf returnsMap & weights
   for (const { assetId, quantity } of portfolio.assets) {
-    /** ------------------------------------------------------
-     * 1) Schlüssel angleichen  (z. B. "BTC"  → "btc")
-     * ----------------------------------------------------- */
-    const key = assetId.toLowerCase?.() ?? assetId;
-    const raw = Array.isArray(barsMap[key]) ? barsMap[key] : [];
-
-    if (!raw.length) {
-      console.error(`❌  barsMap[${key}] ist leer oder undefined`);
-      continue;                          // oder throw, je nach Logik
-    }
-
-    const bars = pickLastBarPerDay(raw); // <- hier crasht es sonst
+    const raw = barsMap[assetId] ?? [];
+    const bars = pickLastBarPerDay(raw);
     if (bars.length < 2) continue;
 
     const lastPrice = bars.at(-1)!.adj;
     totalValue += lastPrice * quantity;
 
     const barYTD = bars.find(b => new Date(b.date) >= startOfYear) ?? bars[0];
-    ytdValue += barYTD.adj * quantity;
+    ytdValue   += barYTD.adj * quantity;
 
     const prices = bars.map(b => b.adj);
-    returnsMap[key] = computeReturns(prices);
-    weights[key]   = lastPrice * quantity;
+    returnsMap[assetId] = computeReturns(prices);
+    weights[assetId]    = lastPrice * quantity;
   }
 
-  // Normalisiere die Gewichte
-  for (const k in weights) weights[k] /= totalValue;
+  // 2) Sichern gegen leeres Portfolio
+  const symbols = Object.keys(returnsMap);
+  if (symbols.length === 0 || totalValue <= 0) {
+    return { totalValue, ytdReturn: 0, volatility: 0, sharpe: 0, maxDrawdown: 0, beta: 0 };
+  }
 
+  // 3) Gewichte normalisieren
+  for (const s of symbols) {
+    weights[s] /= totalValue;
+  }
+
+  // 4) Portfolio-Renditen & simulierte Preise
   const portfolioR = portfolioReturns(returnsMap, weights);
-
-  const simulatedPrices: number[] = portfolioR.reduce<number[]>((acc, r, i) => {
-    if (i === 0) {
-      // erster Preis = totalValue × (1 + erster Return)
-      acc.push(totalValue * (1 + r));
-    } else {
-      acc.push(acc[i - 1] * (1 + r));
-    }
+  const simulatedPrices = portfolioR.reduce<number[]>((acc, r, i) => {
+    acc.push(i === 0 ? totalValue * (1 + r) : acc[i - 1] * (1 + r));
     return acc;
   }, []);
 
-  const dummyAsset: Asset = {
-    id:             "__portfolio__",
-    name:           "Portfolio",
-    symbol:         "PORT",
-    price:          totalValue,
-    priceChange24h: 0,
-    quantity:       1,
-    volatility:     0,
-    historicalData: []
-  };
-  // Berechnung der Kennzahlen
-  const metrics = AssetMetricService.calculateAssetMetrics(
-    dummyAsset,
-    simulatedPrices,
-    undefined,
-    1,
-    timeframe
-  );
+  // 5) Metriken berechnen
+  const dummy: Asset = { id: "__port__", name: "Portfolio", symbol: "PORT", price: totalValue, priceChange24h: 0, quantity:1, volatility:0, historicalData: [] };
+  const metrics = AssetMetricService.calculateAssetMetrics(dummy, simulatedPrices, undefined, 1);
 
-  // Beta gegen Benchmark (z.B. SPY)
-  const benchR = computeReturns(barsMap["SPY"].map(b => b.adj)); // Beispiel für SPY
-  const b = beta(portfolioR, benchR);
+  // 6) Beta nur bei vorhandenem Benchmark
+  let betaValue = 0;
+  if ((barsMap["SPY"] ?? []).length >= 2) {
+    const benchPrices = barsMap["SPY"].map(b => b.adj);
+    betaValue = beta(portfolioR, computeReturns(benchPrices));
+  }
 
   return {
     totalValue,
-    ytdReturn:  totalValue / ytdValue - 1,
-    volatility: metrics.volatility,
-    sharpe:     metrics.sharpe,
-    maxDrawdown:metrics.maxDrawdown,
-    beta: b
-    
+    ytdReturn:   totalValue / ytdValue - 1,
+    volatility:  metrics.volatility,
+    sharpe:      metrics.sharpe,
+    maxDrawdown: metrics.maxDrawdown,
+    beta:        betaValue
   };
 }
