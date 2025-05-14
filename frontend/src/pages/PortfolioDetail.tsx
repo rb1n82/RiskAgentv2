@@ -153,15 +153,20 @@ export default function PortfolioDetail({
 
   // Portfolio wählen
   useEffect(() => {
-    if (portfolioId) selectPortfolio(portfolioId);
-    return () => selectPortfolio(null);
-  }, [portfolioId, selectPortfolio]);
+  if (portfolioId) selectPortfolio(portfolioId);
+  return () => selectPortfolio(null);
+}, [portfolioId, selectPortfolio]);
 
-  // Timeseries importieren (Vite)
-  const [barsMap, setBarsMap] = useState<Record<string, Bar[]>>({});
+// 2) BarsMap beim Ändern der Assets laden
+const [barsMap, setBarsMap] = useState<Record<string, Bar[]>>({});
 
 useEffect(() => {
-  if (!selectedPortfolio) return;             // oder assets, je nach Kontext
+  const assets = selectedPortfolio?.assets;
+  if (!assets || assets.length === 0) {
+    setBarsMap({});
+    return;
+  }
+
   const API = import.meta.env.VITE_API_URL;
   if (!API) {
     console.error("VITE_API_URL ist nicht gesetzt");
@@ -171,15 +176,13 @@ useEffect(() => {
   const loadSeries = async () => {
     const map: Record<string, Bar[]> = {};
     await Promise.all(
-      selectedPortfolio.assets.map(async ({ assetId }) => {
+      assets.map(async ({ assetId }) => {
         try {
-          const res = await fetch(
-            `${API}/data/timeseries/${assetId}.json`,
-            { cache: "no-cache" }
-          );
+          const res = await fetch(`${API}/data/timeseries/${assetId}.json`, { cache: "no-cache" });
           if (!res.ok) throw new Error(res.statusText);
           map[assetId] = await res.json();
-        } catch {
+        } catch (e) {
+          console.warn(`Fehler beim Laden der Series für ${assetId}:`, e);
           map[assetId] = [];
         }
       })
@@ -188,7 +191,7 @@ useEffect(() => {
   };
 
   loadSeries();
-}, [selectedPortfolio]);
+}, [selectedPortfolio?.assets]); 
 
   // 2.5) Duplikate entfernen & letzte 3 Monate filtern
   const processedBarsMap = useMemo(() => {
