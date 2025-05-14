@@ -22,7 +22,9 @@ interface PortfolioAssetTableProps {
 
 // Lade-Funktion
 async function loadMarketData(): Promise<MarketDataType> {
-  const res = await fetch("/data/market_data.json", { cache: "no-cache" });
+  const API = import.meta.env.VITE_API_URL;
+  if (!API) throw new Error('VITE_API_URL ist nicht gesetzt');
+  const res = await fetch("${API}/data/market_data.json", { cache: "no-cache" });
   if (!res.ok) throw new Error(`Failed to load market data: ${res.statusText}`);
   return res.json();
 }
