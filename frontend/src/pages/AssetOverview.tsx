@@ -29,6 +29,8 @@ export interface Snapshot {
   lastUpdated:       number;
 }
 
+const API = import.meta.env.VITE_API_URL;
+
 interface AssetOverviewProps {
   type?: AssetType;
   onNavigate?: (section: Section, params?: any) => void;
@@ -53,7 +55,7 @@ export default function AssetOverview({ type, onNavigate }: AssetOverviewProps) 
 
       // immer das gesamte market_data.json abrufen
       const { data: obj } = await axios.get<Record<string, Snapshot>>(
-        '/data/market-data'
+        '${API}/data/market-data'
       );
       const all = Object.values(obj);
       setAssets(all);
