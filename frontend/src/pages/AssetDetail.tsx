@@ -66,11 +66,14 @@ export default function AssetDetail({ assetId, onNavigate }: AssetDetailProps) {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/data/timeseries/${assetId}.json`);
+        const API = import.meta.env.VITE_API_URL;
+        if (!API) throw new Error('VITE_API_URL ist nicht gesetzt');
+        const res = await fetch(`${API}/data/timeseries/${assetId}.json`, { cache: "no-cache" });
+
         if (!res.ok) throw new Error(res.statusText);
         const raw: Bar[] = await res.json();
-const cleaned = pickLastBarPerDay(raw);
-setBarsMap({ [assetId]: cleaned });
+        const cleaned = pickLastBarPerDay(raw);
+        setBarsMap({ [assetId]: cleaned });
       } catch (e) {
         console.error(e);
       }
