@@ -305,7 +305,10 @@ export function AssetProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       // Lade die Asset-Daten aus der JSON-Datei
-      const response = await fetch('/data/market_data.json');
+      const API = import.meta.env.VITE_API_URL;
+      if (!API) throw new Error('VITE_API_URL ist nicht gesetzt');
+
+      const url = `${API}/data/market_data.json`;
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
