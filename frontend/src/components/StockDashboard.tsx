@@ -14,7 +14,7 @@ interface MarketData {
   lastUpdated: number;
 }
 
-const API_BASE_URL = 'http://localhost:3001'; // Basis-URL für die API
+const API_BASE_URL = import.meta.env.VITE_API_URL; // Basis-URL für die API
 
 export default function StockDashboard() {
   const [marketData, setMarketData] = useState<Record<string, MarketData>>({});
