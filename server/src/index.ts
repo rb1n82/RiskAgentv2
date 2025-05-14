@@ -500,12 +500,9 @@ app.use('/data', express.static(dataDir));
 app.use(express.static(frontDir));
 
 // Fallback für alle anderen Requests
-app.use((_req, res) => {
+app.get('*', (_req, res) => {
   res.sendFile(path.join(frontDir, 'index.html'));
 });
-
-const dataPath = path.join(process.cwd(), 'server', 'data');
-app.use('/data', express.static(dataPath));
 
 app.get("/", (_req, res) => {
   res.status(200).send("OK");
