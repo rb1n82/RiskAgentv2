@@ -26,14 +26,30 @@ export function portfolioReturns(
   returnsMap: Record<string, number[]>,
   weights: Record<string, number>
 ): number[] {
-  const n = Math.min(
-    ...Object.values(returnsMap).map(r => r.length)
-  );
+  // 1) Kein Asset → nichts zu tun
+  const seriesArrays = Object.values(returnsMap);
+  if (seriesArrays.length === 0) {
+    return [];
+  }
+
+  // 2) Kürzeste Serie ermitteln
+  const lengths = seriesArrays.map(r => r.length);
+  const n = Math.min(...lengths);
+
+  // 3) Guard gegen unendliche oder negative Länge
+  if (!isFinite(n) || n <= 0) {
+    return [];
+  }
+
+  // 4) Portfolio-Renditen berechnen
   const port: number[] = [];
   for (let t = 0; t < n; t++) {
     let sum = 0;
     for (const sym in returnsMap) {
-      sum += (weights[sym] ?? 0) * returnsMap[sym][t];
+      const retArray = returnsMap[sym];
+      // Sicherstellen, dass retArray[t] existiert
+      const retValue = t < retArray.length ? retArray[t] : 0;
+      sum += (weights[sym] ?? 0) * retValue;
     }
     port.push(sum);
   }
