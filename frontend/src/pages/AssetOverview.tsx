@@ -53,12 +53,14 @@ export default function AssetOverview({ type, onNavigate }: AssetOverviewProps) 
       setLoading(true);
       setError(null);
 
-      // immer das gesamte market_data.json abrufen
-      const { data: obj } = await axios.get<Record<string, Snapshot>>(
-        '${API}/data/market-data'
+      const API = import.meta.env.VITE_API_URL;
+      if (!API) throw new Error('VITE_API_URL ist nicht gesetzt!');
+
+      // 1) Alle Snapshots holen (Symbol, currentPrice, …)
+      const { data: snapshots } = await axios.get<Snapshot[]>(
+        `${API}/api/market-data`
       );
-      const all = Object.values(obj);
-      setAssets(all);
+      setAssets(snapshots);
     } catch (err) {
       console.error('❌ Fehler beim Laden der Daten:', err);
       setError(err instanceof Error ? err.message : 'Ein unbekannter Fehler ist aufgetreten');
