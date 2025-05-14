@@ -495,10 +495,6 @@ app.use('/data', express.static(dataDir));
      res.json({ok:true}); 
    }) as ExpressHandler);
 
-   const frontDir = path.join(PROJECT_ROOT, 'frontend', 'build');
-// Statische Assets (CSS, JS, Bilder…)
-app.use(express.static(frontDir));
-
 // Fallback für alle anderen Requests
 app.get('*', (_req, res) => {
   res.sendFile(path.join(frontDir, 'index.html'));
