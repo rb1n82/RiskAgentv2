@@ -31,34 +31,39 @@ function pickLastBarPerDay(bars: Bar[]): Bar[] {
 export async function computePortfolioMetrics(
   portfolio: { assets: { assetId: string; quantity: number }[] },
   barsMap: Record<string, Bar[]>,
-  timeframe: "daily" | "weekly" | "monthly" = "daily" // Nehmen wir den timeframe als Parameter
+  timeframe: "daily" | "weekly" | "monthly" = "daily"
 ): Promise<RiskMetrics> {
-  let totalValue = 0;
-  let ytdValue = 0;
-  const startOfYear = new Date(new Date().getFullYear(), 0, 1);
 
+  const startOfYear = new Date(new Date().getFullYear(), 0, 1);
   const returnsMap: Record<string, number[]> = {};
   const weights: Record<string, number> = {};
+  let totalValue = 0;
+  let ytdValue = 0;
 
   for (const { assetId, quantity } of portfolio.assets) {
-    const rawBars = barsMap[assetId] || [];
-    const bars = pickLastBarPerDay(rawBars);
+    /** ------------------------------------------------------
+     * 1) Schlüssel angleichen  (z. B. "BTC"  → "btc")
+     * ----------------------------------------------------- */
+    const key = assetId.toLowerCase?.() ?? assetId;
+    const raw = Array.isArray(barsMap[key]) ? barsMap[key] : [];
+
+    if (!raw.length) {
+      console.error(`❌  barsMap[${key}] ist leer oder undefined`);
+      continue;                          // oder throw, je nach Logik
+    }
+
+    const bars = pickLastBarPerDay(raw); // <- hier crasht es sonst
     if (bars.length < 2) continue;
 
-    const last = bars.at(-1)!.adj; // Letzter Preis
-    totalValue += last * quantity;
+    const lastPrice = bars.at(-1)!.adj;
+    totalValue += lastPrice * quantity;
 
-    // Suche den Preis am Jahresanfang
-    const barYTD = bars.find(b => new Date(b.date) >= startOfYear) || bars[0];
+    const barYTD = bars.find(b => new Date(b.date) >= startOfYear) ?? bars[0];
     ytdValue += barYTD.adj * quantity;
 
-    // Renditen basierend auf dem timeframe berechnen
     const prices = bars.map(b => b.adj);
-    
-
-    returnsMap[assetId] = computeReturns(prices);
-
-    weights[assetId] = last * quantity;
+    returnsMap[key] = computeReturns(prices);
+    weights[key]   = lastPrice * quantity;
   }
 
   // Normalisiere die Gewichte
