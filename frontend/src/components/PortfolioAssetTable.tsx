@@ -24,8 +24,12 @@ interface PortfolioAssetTableProps {
 async function loadMarketData(): Promise<MarketDataType> {
   const API = import.meta.env.VITE_API_URL;
   if (!API) throw new Error('VITE_API_URL ist nicht gesetzt');
-  const res = await fetch("${API}/data/market_data.json", { cache: "no-cache" });
-  if (!res.ok) throw new Error(`Failed to load market data: ${res.statusText}`);
+
+  // Hier rufst du die Express-Route /api/market-data auf
+  const res = await fetch(`${API}/api/market-data`, { cache: 'no-cache' });
+  if (!res.ok) {
+    throw new Error(`Failed to load market data: ${res.status} ${res.statusText}`);
+  }
   return res.json();
 }
 
