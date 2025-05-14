@@ -309,6 +309,7 @@ export function AssetProvider({ children }: { children: React.ReactNode }) {
       if (!API) throw new Error('VITE_API_URL ist nicht gesetzt');
 
       const url = `${API}/data/market_data.json`;
+      const response = await fetch(url, { cache: 'no-cache' })
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
